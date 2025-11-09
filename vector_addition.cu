@@ -24,7 +24,7 @@ int main()
   std::cout << "total amount of required memory (bytes): " << 3 * bytes << '\n';
 }
 
-// Kernel definitions
+// GPU kernel definitions
 __global__ void gpu_vector_add( unsigned int size, float *dev_a, float *dev_b, float *dev_c )
 {
   int thread_id = blockDim.x * blockIdx.x + threadIdx.x;
@@ -33,13 +33,26 @@ __global__ void gpu_vector_add( unsigned int size, float *dev_a, float *dev_b, f
   {
     dev_c[thread_id] = d_a[thread_id] + d_b[thread_id];
   }
-
-  return;
 }
 
 __global__ void gpu_print_thread_id()
 {
   printf( "blockID: %u, threadId: %d\n", blockIdx.x, threadIdx.x );
+}
 
-  return;
+// Host function definitions
+void *gpu_mem_alloc( void *host_p, const unsigned int bytes)
+{
+  void *dev_p = NULL;
+  cudaError_t status = cudaMalloc( &dev_p, bytes );
+  if ( status != cudaSuccess ) stop("ERROR: CUDA MEMORY ALLOCATION FAILED! -> TYPE 1");
+
+  status = cudaMemCpy( dev_p, host_p, bytes, cudeMemcpyHostToDevice );
+  if ( status != cudaSuccess ) stop("ERROR: CUDA MEMORY ALLOCATION FAILED! -> TYPE 2");
+}
+
+void stop( const std::string &error_message )
+{
+  std::cerr << error_message << '\n';
+  exit(1);
 }
