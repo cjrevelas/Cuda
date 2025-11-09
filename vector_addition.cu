@@ -23,3 +23,23 @@ int main()
   std::cout << "vector size in bytes is equal to: " << bytes << '\n';
   std::cout << "total amount of required memory (bytes): " << 3 * bytes << '\n';
 }
+
+// Kernel definitions
+__global__ void gpu_vector_add( unsigned int size, float *dev_a, float *dev_b, float *dev_c )
+{
+  int thread_id = blockDim.x * blockIdx.x + threadIdx.x;
+
+  if ( thread_id < size )
+  {
+    dev_c[thread_id] = d_a[thread_id] + d_b[thread_id];
+  }
+
+  return;
+}
+
+__global__ void gpu_print_thread_id()
+{
+  printf( "blockID: %u, threadId: %d\n", blockIdx.x, threadIdx.x );
+
+  return;
+}
